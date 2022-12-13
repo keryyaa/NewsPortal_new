@@ -1,0 +1,61 @@
+{% extends 'flatpages/default.html' %}
+{% load custom_tags %}
+{% load custom_filters %}
+
+{% block title %}
+Главная
+{% endblock title %}
+
+
+{% block content %}
+<h4>Все посты</h4>
+<h6>Всего постов: {{ PostList|length }}</h6>
+<h6>Время: {% current_time '%H:%M:%S' %}</h6>
+
+<a href="{% url 'PostCreate' %}">Написать пост</a>
+{% if PostList %}
+    <table align="center">
+        <tr>
+            <td>Заголовок</td>
+            <td>Дата публикации</td>
+            <td>Новость</td>
+            <td>Действия</td>
+        </tr>
+        {% for news in PostList %}
+        <tr>
+            <td><a href="{% url 'PostDetail' pk=news.pk %}">{{ news.title | truncatechars:15 | censor_text }}</a></td>
+            <td>{{ news.time_in|date:'d M Y' }}</td>
+            <td>{{ news.text | truncatechars:25 | censor_text}}</td>
+            <td>
+                <a href="{% url 'PostUpdate' pk=news.pk %}">Изменить</a>
+                <a href="{% url 'PostDelete' pk=news.pk %}">Удалить</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+<h4>Постов нет!</h4>
+{% endif %}
+ {# Добавляем пагинацию на страницу #}
+
+   {# Информация о предыдущих страницах #}
+   {% if page_obj.has_previous %}
+       <a href="?{% url_replace page=1 %}">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {# Информация о текущей странице #}
+   {{ page_obj.number }}
+
+   {# Информация о следующих страницах #}
+   {% if page_obj.has_next %}
+       <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+{% endblock content %}
